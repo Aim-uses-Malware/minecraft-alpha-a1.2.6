@@ -1,56 +1,31 @@
 # Minecraft Alpha a1.2.6 — Deobfuscated Source
 
-Декомпилированный и деобфусцированный исходный код Minecraft Alpha a1.2.6.  
-Сборка через Gradle, без необходимости иметь официальный Minecraft Launcher.
+Decompiled and deobfuscated source code of Minecraft Alpha a1.2.6.
+Builds with Gradle — no official Minecraft Launcher required.
 
 ---
 
-## Структура проекта
+## Requirements
 
-```
-minecraft-alpha/
-├── src/
-│   └── main/
-│       └── java/
-│           └── net/minecraft/
-│               ├── client/          # Точка входа (Minecraft.java)
-│               ├── src/             # Весь игровой код (~455 классов)
-│               └── isom/            # Изометрический превью (апплет)
-├── game/
-│   └── assets/                      # Ресурсы (звуки, индексы)
-│       ├── indexes/
-│       │   └── a1.2.0.json
-│       └── objects/                 # Хешированные файлы ресурсов
-├── build.gradle
-├── settings.gradle
-└── gradle/
-    └── wrapper/
-        └── gradle-wrapper.properties
-```
+| Tool   | Version                          |
+| ------ | --------------------------------- |
+| JDK    | 8 (required — won't run on newer) |
+| Gradle | 8.7+ (via wrapper, no install needed) |
+
+> ⚠️ Minecraft Alpha is not compatible with newer Java versions due to legacy APIs (`sun.*`, AWT, LWJGL 2).
 
 ---
 
-## Требования
+## Quick Start
 
-| Инструмент | Версия        |
-|------------|---------------|
-| JDK        | 8 (обязательно, не выше) |
-| Gradle     | 8.7+ (через wrapper, ставить не нужно) |
-
-> ⚠️ Именно **JDK 8**. Minecraft Alpha не совместим с более новыми версиями Java из-за устаревших API (`sun.*`, AWT-специфика, LWJGL 2).
-
----
-
-## Быстрый старт
-
-### 1. Клонировать репозиторий
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/minecraft-alpha.git
-cd minecraft-alpha
+git clone https://github.com/YOUR_USERNAME/minecraft-alpha-a1.2.6.git
+cd minecraft-alpha-a1.2.6
 ```
 
-### 2. Запустить игру
+### 2. Run the game
 
 **Linux / macOS:**
 ```bash
@@ -58,26 +33,23 @@ cd minecraft-alpha
 ```
 
 **Windows:**
-```cmd
+```bash
 gradlew.bat run
 ```
 
-Gradle автоматически:
-- скачает все зависимости (LWJGL, Paulscode и т.д.)
-- распакует нативные библиотеки в `build/natives/`
-- запустит игру через LaunchWrapper
+Gradle will automatically download dependencies (LWJGL, Paulscode, etc.) and extract native libraries before launching.
 
 ---
 
-## Сборка JAR
+## Build a JAR
 
 ```bash
 ./gradlew jar
 ```
 
-Результат: `build/libs/minecraft-alpha-a1.2.6.jar` (fat jar, все зависимости внутри).
+Output: `build/libs/minecraft-alpha-a1.2.6.jar` (fat jar, all dependencies included).
 
-Запуск JAR вручную:
+Run it manually:
 ```bash
 java -Djava.library.path=build/natives \
      -jar build/libs/minecraft-alpha-a1.2.6.jar \
@@ -91,96 +63,60 @@ java -Djava.library.path=build/natives \
 
 ---
 
-## Настройка IDE
+## Dependencies
 
-### IntelliJ IDEA
-
-1. `File → Open` → выбрать папку проекта
-2. IDEA автоматически импортирует Gradle
-3. Run-конфигурация `run` уже настроена через `build.gradle`
-4. Убедитесь что в `File → Project Structure → SDK` выбран JDK 8
-
-### Eclipse
-
-1. `File → Import → Gradle → Existing Gradle Project`
-2. Выбрать папку проекта
-3. Выбрать JDK 8 в настройках проекта
-
-### VS Code
-
-1. Установить расширения: `Extension Pack for Java`, `Gradle for Java`
-2. Открыть папку проекта
-3. В панели Gradle: `Tasks → application → run`
+| Library                         | Version        | Purpose                |
+| -------------------------------- | --------------- | ----------------------- |
+| `org.mcphackers:launchwrapper`   | 1.2.4           | Launch entry point       |
+| `org.lwjgl.lwjgl:lwjgl`          | 2.9.4-nightly   | OpenGL, window, input    |
+| `net.java.jinput:jinput`         | 2.0.5           | Gamepad/joystick input   |
+| `com.paulscode:soundsystem`      | 20120107        | Sound engine              |
+| `org.ow2.asm:asm`                | 9.9             | Bytecode (LaunchWrapper)  |
+| `org.json:json`                  | 20230311        | Resource JSON parsing     |
 
 ---
 
-## Зависимости
-
-| Библиотека | Версия | Назначение |
-|---|---|---|
-| `org.mcphackers:launchwrapper` | 1.2.4 | Шим запуска (точка входа) |
-| `org.lwjgl.lwjgl:lwjgl` | 2.9.4-nightly | OpenGL, окно, ввод |
-| `org.lwjgl.lwjgl:lwjgl_util` | 2.9.4-nightly | Утилиты LWJGL |
-| `net.java.jinput:jinput` | 2.0.5 | Геймпад/джойстик |
-| `com.paulscode:soundsystem` | 20120107 | Звуковая система |
-| `com.paulscode:codecjorbis` | 20230120 | Декодер OGG Vorbis |
-| `com.paulscode:codecwav` | 20101023 | Декодер WAV |
-| `com.paulscode:libraryjavasound` | 20101123 | Java Sound backend |
-| `com.paulscode:librarylwjglopenal` | 20100824 | OpenAL backend |
-| `org.ow2.asm:asm` | 9.9 | Байткод (LaunchWrapper) |
-| `org.json:json` | 20230311 | Разбор JSON ресурсов |
-
----
-
-## Аргументы запуска (LaunchWrapper)
-
-| Аргумент | Значение по умолчанию | Описание |
-|---|---|---|
-| `--username` | `Player` | Имя игрока |
-| `--uuid` | `-` | UUID (не нужен в offline) |
-| `--session` | `-` | Токен сессии |
-| `--version` | `a1.2.6` | Версия клиента |
-| `--gameDir` | `.` (папка `game/`) | Рабочая директория |
-| `--assetsDir` | `assets` | Папка ресурсов |
-| `--assetIndex` | `a1.2.0` | Индекс ресурсов |
-| `--skinProxy` | `pre-b1.9-pre4` | Прокси для скинов |
-
-Изменить можно в `build.gradle` в блоке `run { args = [...] }`.
-
----
-
-## Как это работает
+## Project Structure
 
 ```
-gradlew run
-    └─► LaunchWrapper (org.mcphackers.launchwrapper.Launch)
-            └─► net.minecraft.client.Minecraft (основной класс игры)
-                    ├─► LWJGL 2 (окно OpenGL)
-                    ├─► Paulscode (звук через OpenAL)
-                    └─► game/assets/ (текстуры, звуки)
+minecraft-alpha/
+├── src/main/java/net/minecraft/
+│   ├── client/      # Entry point (Minecraft.java)
+│   ├── src/         # All game code (~455 classes)
+│   └── isom/        # Isometric preview applet
+├── src/main/resources/   # Bundled textures/icons (pack.png, gui/, mob/, etc.)
+├── game/assets/          # External sound assets (indexes + hashed objects)
+├── build.gradle
+└── settings.gradle
 ```
 
-LaunchWrapper — это лёгкий шим, который имитирует поведение оригинального Minecraft Launcher, передавая нужные аргументы в основной класс.
+---
+
+## Important Note on Resources
+
+This repository contains **only the decompiled code** — not Mojang's original assets, for copyright reasons. To get a fully working game, you need to add:
+
+- **Textures & icons** (`pack.png`, `gui/`, `mob/`, `terrain.png`, `font/`, etc.) → extract from an original `client.jar` and place under `src/main/resources/`.
+- **Sounds & music** (`.ogg` / `.mus`) → place under `game/assets/objects/<hash[0:2]>/<hash>`, matching the index at `game/assets/indexes/a1.2.0.json`.
+
+Without these, the game will compile and launch, but crash on startup (`ImageIO.read input == null`) or run silently without audio.
 
 ---
 
-## Возможные проблемы
+## Troubleshooting
 
-**`UnsupportedClassVersionError`** — используется JDK новее 8.  
-→ Установи JDK 8 и укажи его в `JAVA_HOME`.
+**`UnsupportedClassVersionError`** — you're using a JDK newer than 8.
+→ Install JDK 8 and set it as `JAVA_HOME`.
 
-**`SIGSEGV` / падение при старте** — нативные библиотеки не распакованы.  
-→ Запусти `./gradlew extractNatives` вручную.
+**Crash at startup (`pack.png` / `gui/logo.png` not found)** — texture resources are missing.
+→ See [Resources](#important-note-on-resources) above.
 
-**Нет звука** — отсутствуют файлы в `game/assets/objects/`.  
-→ Файлы ресурсов хранятся в хешированном виде согласно `game/assets/indexes/a1.2.0.json`. При необходимости можно восстановить их с помощью оригинального лаунчера.
-
-**`Could not resolve` зависимости** — Maven репозиторий `repo.mcphackers.org` недоступен.  
-→ Скачай JAR вручную с [mcphackers releases](https://github.com/MCPhackers/launchwrapper/releases) и добавь в `libs/`.
+**No sound** — asset objects are missing from `game/assets/objects/`.
+→ Populate them from the asset index, or run through a launcher (e.g. Betacraft) that fetches them automatically.
 
 ---
 
-## Лицензия
+## License
 
-Этот репозиторий содержит деобфусцированный код Minecraft, права на который принадлежат Mojang / Microsoft.  
-Репозиторий предназначен **только для образовательных целей**.
+This repository contains deobfuscated Minecraft code. All rights belong to Mojang / Microsoft.
+Provided for **educational purposes only**.
