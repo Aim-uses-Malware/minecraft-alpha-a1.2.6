@@ -25,7 +25,7 @@ jobs:
           gradle-version: '8.7'
 
       - name: Build
-        run: gradle jar
+        run: gradle jar -x extractNatives
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
