@@ -1,0 +1,113 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'net.minecraft'
+version = 'a1.2.6'
+description = 'Minecraft Alpha a1.2.6 - deobfuscated source'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// Main class goes through launchwrapper, not directly to Minecraft
+application {
+    mainClass = 'org.mcphackers.launchwrapper.Launch'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://libraries.minecraft.net' }
+    maven { url 'https://repo.mcphackers.org/libraries' }
+}
+
+configurations {
+    natives
+}
+
+dependencies {
+    // LaunchWrapper (entry point shim)
+    implementation 'org.mcphackers:launchwrapper:1.2.4'
+
+    // LWJGL 2
+    implementation 'org.lwjgl.lwjgl:lwjgl:2.9.4-nightly-20150209'
+    implementation 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
+    natives     'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209:natives-windows'
+    natives     'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209:natives-linux'
+    natives     'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209:natives-osx'
+
+    // JInput
+    implementation 'net.java.jinput:jinput:2.0.5'
+    implementation 'net.java.jutils:jutils:1.0.0'
+    natives     'net.java.jinput:jinput-platform:2.0.5:natives-all'
+
+    // Paulscode sound system
+    implementation 'com.paulscode:soundsystem:20120107'
+    implementation 'com.paulscode:codecjorbis:20230120'
+    implementation 'com.paulscode:codecwav:20101023'
+    implementation 'com.paulscode:libraryjavasound:20101123'
+    implementation 'com.paulscode:librarylwjglopenal:20100824'
+
+    // ASM
+    implementation 'org.ow2.asm:asm:9.9'
+    implementation 'org.ow2.asm:asm-commons:9.9'
+    implementation 'org.ow2.asm:asm-tree:9.9'
+
+    // JSON
+    implementation 'org.json:json:20230311'
+}
+
+// Extract native libraries
+task extractNatives(type: Copy) {
+    from configurations.natives.collect { zipTree(it) }
+    into "${buildDir}/natives"
+    exclude 'META-INF/**'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Run the game
+run {
+    dependsOn extractNatives
+    workingDir = file('game')
+    jvmArgs = [
+        "-Djava.library.path=${buildDir}/natives",
+        '-Xmx1G',
+        '-Xms512M'
+    ]
+    args = [
+        '--username',   'Player',
+        '--uuid',       '-',
+        '--session',    '-',
+        '--version',    'a1.2.6',
+        '--gameDir',    '.',
+        '--assetsDir',  'assets',
+        '--assetIndex', 'a1.2.0',
+        '--accessToken','-',
+        '--userProperties', '{}',
+        '--userType',   'legacy',
+        '--versionType','release',
+        '--skinProxy',  'pre-b1.9-pre4'
+    ]
+}
+
+// Fat JAR (все зависимости внутри)
+jar {
+    archiveBaseName = 'minecraft-alpha'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'org.mcphackers.launchwrapper.Launch'
+    }
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xlint:none', '-nowarn']
+}
