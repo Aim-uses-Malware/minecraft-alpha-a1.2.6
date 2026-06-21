@@ -8,11 +8,11 @@ version = 'a1.2.6'
 description = 'Minecraft Alpha a1.2.6 - deobfuscated source'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
-// Main class goes through launchwrapper, not directly to Minecraft
 application {
     mainClass = 'org.mcphackers.launchwrapper.Launch'
 }
@@ -28,38 +28,31 @@ configurations {
 }
 
 dependencies {
-    // LaunchWrapper (entry point shim)
     implementation 'org.mcphackers:launchwrapper:1.2.4'
 
-    // LWJGL 2
     implementation 'org.lwjgl.lwjgl:lwjgl:2.9.4-nightly-20150209'
     implementation 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
-    natives     'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209:natives-windows'
-    natives     'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209:natives-linux'
-    natives     'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209:natives-osx'
+    natives 'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209:natives-windows'
+    natives 'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209:natives-linux'
+    natives 'org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209:natives-osx'
 
-    // JInput
     implementation 'net.java.jinput:jinput:2.0.5'
     implementation 'net.java.jutils:jutils:1.0.0'
-    natives     'net.java.jinput:jinput-platform:2.0.5:natives-all'
+    // jinput natives не в Maven Central — скачиваются отдельно при запуске
 
-    // Paulscode sound system
     implementation 'com.paulscode:soundsystem:20120107'
     implementation 'com.paulscode:codecjorbis:20230120'
     implementation 'com.paulscode:codecwav:20101023'
     implementation 'com.paulscode:libraryjavasound:20101123'
     implementation 'com.paulscode:librarylwjglopenal:20100824'
 
-    // ASM
     implementation 'org.ow2.asm:asm:9.9'
     implementation 'org.ow2.asm:asm-commons:9.9'
     implementation 'org.ow2.asm:asm-tree:9.9'
 
-    // JSON
     implementation 'org.json:json:20230311'
 }
 
-// Extract native libraries
 task extractNatives(type: Copy) {
     from configurations.natives.collect { zipTree(it) }
     into "${buildDir}/natives"
@@ -67,7 +60,6 @@ task extractNatives(type: Copy) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// Run the game
 run {
     dependsOn extractNatives
     workingDir = file('game')
@@ -77,22 +69,21 @@ run {
         '-Xms512M'
     ]
     args = [
-        '--username',   'Player',
-        '--uuid',       '-',
-        '--session',    '-',
-        '--version',    'a1.2.6',
-        '--gameDir',    '.',
-        '--assetsDir',  'assets',
-        '--assetIndex', 'a1.2.0',
-        '--accessToken','-',
+        '--username',    'Player',
+        '--uuid',        '-',
+        '--session',     '-',
+        '--version',     'a1.2.6',
+        '--gameDir',     '.',
+        '--assetsDir',   'assets',
+        '--assetIndex',  'a1.2.0',
+        '--accessToken', '-',
         '--userProperties', '{}',
-        '--userType',   'legacy',
-        '--versionType','release',
-        '--skinProxy',  'pre-b1.9-pre4'
+        '--userType',    'legacy',
+        '--versionType', 'release',
+        '--skinProxy',   'pre-b1.9-pre4'
     ]
 }
 
-// Fat JAR (все зависимости внутри)
 jar {
     archiveBaseName = 'minecraft-alpha'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
