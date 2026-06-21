@@ -65,10 +65,28 @@ public class RenderEngine {
 		}
 	}
 
-	private BufferedImage unwrapImageByColumns(BufferedImage var1) {
-		int var2 = var1.getWidth() / 16;
-		BufferedImage var3 = new BufferedImage(16, var1.getHeight() * var2, 2);
-		Graphics var4 = var3.getGraphics();
+private BufferedImage readTextureImage(InputStream var1) throws IOException {
+	if (var1 == null) {
+		System.err.println("Warning: missing texture resource, using placeholder");
+		return createMissingTexture();
+	}
+	BufferedImage var2 = ImageIO.read(var1);
+	var1.close();
+	return var2;
+}
+
+private BufferedImage createMissingTexture() {
+	BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+	Graphics g = img.getGraphics();
+	g.setColor(java.awt.Color.MAGENTA);
+	g.fillRect(0, 0, 8, 8);
+	g.fillRect(8, 8, 8, 8);
+	g.setColor(java.awt.Color.BLACK);
+	g.fillRect(8, 0, 8, 8);
+	g.fillRect(0, 8, 8, 8);
+	g.dispose();
+	return img;
+}
 
 		for(int var5 = 0; var5 < var2; ++var5) {
 			var4.drawImage(var1, -var5 * 16, var5 * var1.getHeight(), (ImageObserver)null);
