@@ -1,0 +1,28 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# Natives (downloaded at build time)
+natives/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Minecraft runtime
+game/saves/
+game/screenshots/
+game/crash-reports/
+game/options.txt
+game/*.log
