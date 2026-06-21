@@ -1,71 +1,98 @@
 package net.minecraft.src;
+// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.kpdus.com/jad.html
+// Decompiler options: packimports(3) braces deadcode 
 
-import java.io.File;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 
-public class GuiSelectWorld extends GuiScreen {
-	protected GuiScreen parentScreen;
-	protected String screenTitle = "Select world";
-	private boolean selected = false;
+public class GuiSelectWorld extends GuiScreen
+{
 
-	public GuiSelectWorld(GuiScreen var1) {
-		this.parentScreen = var1;
-	}
+    public GuiSelectWorld(GuiScreen guiscreen)
+    {
+        screenTitle = "Select world";
+        selected = false;
+        parentScreen = guiscreen;
+    }
 
-	public void initGui() {
-		File var1 = Minecraft.getMinecraftDir();
+    public void initGui()
+    {
+        java.io.File file = Minecraft.getMinecraftDir();
+        for(int i = 0; i < 5; i++)
+        {
+            NBTTagCompound nbttagcompound = World.func_629_a(file, (new StringBuilder()).append("World").append(i + 1).toString());
+            if(nbttagcompound == null)
+            {
+                controlList.add(new GuiButton(i, width / 2 - 100, height / 6 + 24 * i, "- empty -"));
+            } else
+            {
+                String s = (new StringBuilder()).append("World ").append(i + 1).toString();
+                long l = nbttagcompound.getLong("SizeOnDisk");
+                s = (new StringBuilder()).append(s).append(" (").append((float)(((l / 1024L) * 100L) / 1024L) / 100F).append(" MB)").toString();
+                controlList.add(new GuiButton(i, width / 2 - 100, height / 6 + 24 * i, s));
+            }
+        }
 
-		for(int var2 = 0; var2 < 5; ++var2) {
-			NBTTagCompound var3 = World.func_629_a(var1, "World" + (var2 + 1));
-			if(var3 == null) {
-				this.controlList.add(new GuiButton(var2, this.width / 2 - 100, this.height / 6 + 24 * var2, "- empty -"));
-			} else {
-				String var4 = "World " + (var2 + 1);
-				long var5 = var3.getLong("SizeOnDisk");
-				var4 = var4 + " (" + (float)(var5 / 1024L * 100L / 1024L) / 100.0F + " MB)";
-				this.controlList.add(new GuiButton(var2, this.width / 2 - 100, this.height / 6 + 24 * var2, var4));
-			}
-		}
+        initGui2();
+    }
 
-		this.initGui2();
-	}
+    protected String getWorldName(int i)
+    {
+        java.io.File file = Minecraft.getMinecraftDir();
+        return World.func_629_a(file, (new StringBuilder()).append("World").append(i).toString()) == null ? null : (new StringBuilder()).append("World").append(i).toString();
+    }
 
-	protected String getWorldName(int var1) {
-		File var2 = Minecraft.getMinecraftDir();
-		return World.func_629_a(var2, "World" + var1) != null ? "World" + var1 : null;
-	}
+    public void initGui2()
+    {
+        controlList.add(new GuiButton(5, width / 2 - 100, height / 6 + 120 + 12, "Delete world..."));
+        controlList.add(new GuiButton(6, width / 2 - 100, height / 6 + 168, "Cancel"));
+    }
 
-	public void initGui2() {
-		this.controlList.add(new GuiButton(5, this.width / 2 - 100, this.height / 6 + 120 + 12, "Delete world..."));
-		this.controlList.add(new GuiButton(6, this.width / 2 - 100, this.height / 6 + 168, "Cancel"));
-	}
+    protected void actionPerformed(GuiButton guibutton)
+    {
+        if(!guibutton.enabled)
+        {
+            return;
+        }
+        if(guibutton.id < 5)
+        {
+            selectWorld(guibutton.id + 1);
+        } else
+        if(guibutton.id == 5)
+        {
+            mc.displayGuiScreen(new GuiDeleteWorld(this));
+        } else
+        if(guibutton.id == 6)
+        {
+            mc.displayGuiScreen(parentScreen);
+        }
+    }
 
-	protected void actionPerformed(GuiButton var1) {
-		if(var1.enabled) {
-			if(var1.id < 5) {
-				this.selectWorld(var1.id + 1);
-			} else if(var1.id == 5) {
-				this.mc.displayGuiScreen(new GuiDeleteWorld(this));
-			} else if(var1.id == 6) {
-				this.mc.displayGuiScreen(this.parentScreen);
-			}
+    public void selectWorld(int i)
+    {
+        mc.displayGuiScreen(null);
+        if(selected)
+        {
+            return;
+        } else
+        {
+            selected = true;
+            mc.field_6327_b = new PlayerControllerTest(mc);
+            mc.func_6247_b((new StringBuilder()).append("World").append(i).toString());
+            mc.displayGuiScreen(null);
+            return;
+        }
+    }
 
-		}
-	}
+    public void drawScreen(int i, int j, float f)
+    {
+        drawDefaultBackground();
+        drawCenteredString(fontRenderer, screenTitle, width / 2, 20, 0xffffff);
+        super.drawScreen(i, j, f);
+    }
 
-	public void selectWorld(int var1) {
-		this.mc.displayGuiScreen((GuiScreen)null);
-		if(!this.selected) {
-			this.selected = true;
-			this.mc.field_6327_b = new PlayerControllerSP(this.mc);
-			this.mc.func_6247_b("World" + var1);
-			this.mc.displayGuiScreen((GuiScreen)null);
-		}
-	}
-
-	public void drawScreen(int var1, int var2, float var3) {
-		this.drawDefaultBackground();
-		this.drawCenteredString(this.fontRenderer, this.screenTitle, this.width / 2, 20, 16777215);
-		super.drawScreen(var1, var2, var3);
-	}
+    protected GuiScreen parentScreen;
+    protected String screenTitle;
+    private boolean selected;
 }
